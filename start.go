@@ -138,7 +138,7 @@ func (re *GetOTPResp) getOTP(mobile string) {
 	resp, err := Client.R().SetHeader("Accept", "application/json").SetBody(ot).Post(GetOTP)
 
 	if err != nil {
-		log.Printf("Error fetching otp: %v", err)
+		fmt.Printf("Error fetching otp: %v", err)
 	}
 
 	json.Unmarshal(resp.Body(), re)
@@ -171,8 +171,12 @@ func (conf *ConfirmOTPRespToken) ConfirmMyOTP(txnId string, otpV string) string 
 }
 
 func (pin *CentersByPIN) getCentersByPIN(pinCode string, date string, token string) {
-	log.Printf("pincode : %s\n", pinCode)
-	log.Printf("date : %s\n", date)
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	// log.Printf("pincode : %s\n", pinCode)
+	// log.Printf("date : %s\n", date)
 	resp, err := Client.R().SetQueryParams(map[string]string{
 		"pincode": pinCode,
 		"date":    date,
@@ -228,15 +232,19 @@ func main() {
 	var ex bool
 	for ex != true {
 		var ch string
-		log.Println("Choose options")
-		log.Println("*********************************************")
-		log.Println("1. Non-OTP based (State-Dist-Center list)")
-		log.Println("2. OTP based (PIN based Center list)")
-		log.Println("3. Exit")
-		log.Println("*********************************************")
+		fmt.Println("Choose options")
+		fmt.Println("*********************************************")
+		fmt.Println("1. Non-OTP based (State-Dist-Center list)")
+		fmt.Println("2. OTP based (PIN based Center list)")
+		fmt.Println("3. Exit")
+		fmt.Println("*********************************************")
 		fmt.Print(">>")
 		fmt.Scanf("%s\n", &ch)
-		log.Printf("The choice: %v", ch)
+		fmt.Printf("The choice: %v", ch)
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
 
 		switch ch {
 		case "1":
@@ -246,7 +254,7 @@ func main() {
 			CaseB()
 			ex = false
 		case "3":
-			log.Println("********Exiting the Program****************")
+			fmt.Println("********Exiting the Program****************")
 			ex = true
 		}
 	}
@@ -257,7 +265,7 @@ func main() {
 
 //*****************************************FUNCTIONS*************************************************
 func NoOTP(dStateName string, dDistrictName string, dDate string, dVac string) {
-	log.Println("*********Calling non OTP based Center Information*********")
+	fmt.Println("*********Getting non OTP based Center Information*********")
 
 	// dStateName := flag.String("s", "Karnataka", "The required state..Default: Karnataka")
 	// dDistrictName := flag.String("d", "BBMP", "The desired district..Default: BBMP")
@@ -274,9 +282,9 @@ func NoOTP(dStateName string, dDistrictName string, dDate string, dVac string) {
 
 		//filter for state
 		if state.StateName == dStateName {
-			log.Printf("State: %s", state.StateName)
+			//fmt.Printf("State: %s", state.StateName)
 			var districts Districts
-			log.Printf("State id : %s", strconv.Itoa(state.StateID))
+			//fmt.Printf("State id : %s", strconv.Itoa(state.StateID))
 
 			//get the list of districts
 			districts.getDistricts(strconv.Itoa(state.StateID))
@@ -284,7 +292,7 @@ func NoOTP(dStateName string, dDistrictName string, dDate string, dVac string) {
 
 				// filter for district
 				if district.DistrictName == dDistrictName {
-					log.Printf("District ID: %d", district.DistrictID)
+					//fmt.Printf("District ID: %d", district.DistrictID)
 
 					var centers Centers
 					//get the centers for district , date, vaccine
@@ -318,7 +326,15 @@ func CaseA() {
 	fmt.Scanf("%s\n", &dDate)
 	fmt.Println("******************************************")
 	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
 	NoOTP(st, dt, dDate, vc)
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
 }
 
 func CaseB() {
@@ -328,7 +344,15 @@ func CaseB() {
 		fmt.Println("***********Authentication Passed for OTP based calls*******")
 		callOTPBased()
 	} else {
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
 		fmt.Println("***********Authentication Failed or not done*******")
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
 		Bearer = getAuthenticated()
 		callOTPBased()
 
@@ -341,25 +365,33 @@ func displayPinCenters(pin *CentersByPIN) {
 		log.Println("No Vaccines available for the location")
 	} else {
 		for _, session := range pin.Sessions {
-			log.Println("**************************************************************************")
-			log.Printf("Date: %v", session.Date)
+			fmt.Println()
+			fmt.Println()
+			fmt.Println()
+			fmt.Println()
+			fmt.Println("**************************************************************************")
+			fmt.Printf("Date: %v", session.Date)
 			log.Printf("Address: %v", session.Address)
-			log.Printf("Name: %v", session.Name)
-			log.Printf("State: %v", session.StateName)
-			log.Printf("District: %v", session.DistrictName)
-			log.Printf("Block: %v", session.BlockName)
-			log.Printf("Block: %v", session.BlockName)
-			log.Printf("PIN: %v", session.Pincode)
-			log.Printf("From: %v", session.From)
-			log.Printf("To: %v", session.To)
-			log.Printf("Fee Type: %v", session.FeeType)
-			log.Printf("Fees: %v", session.Fee)
-			log.Printf("Dosage 1: %v", session.AvailableCapacityDose1)
-			log.Printf("Dosage 2: %v", session.AvailableCapacityDose2)
-			log.Printf("Age Limit %v", session.MinAgeLimit)
-			log.Printf("Vaccine %v", session.Vaccine)
-			log.Printf("Slots %v", session.Slots)
-			log.Println("**************************************************************************")
+			fmt.Printf("Name: %v", session.Name)
+			fmt.Printf("State: %v", session.StateName)
+			fmt.Printf("District: %v", session.DistrictName)
+			fmt.Printf("Block: %v", session.BlockName)
+			fmt.Printf("Block: %v", session.BlockName)
+			fmt.Printf("PIN: %v", session.Pincode)
+			fmt.Printf("From: %v", session.From)
+			fmt.Printf("To: %v", session.To)
+			fmt.Printf("Fee Type: %v", session.FeeType)
+			fmt.Printf("Fees: %v", session.Fee)
+			fmt.Printf("Dosage 1: %v", session.AvailableCapacityDose1)
+			fmt.Printf("Dosage 2: %v", session.AvailableCapacityDose2)
+			fmt.Printf("Age Limit %v", session.MinAgeLimit)
+			fmt.Printf("Vaccine %v", session.Vaccine)
+			fmt.Printf("Slots %v", session.Slots)
+			fmt.Println("**************************************************************************")
+			fmt.Println()
+			fmt.Println()
+			fmt.Println()
+			fmt.Println()
 		}
 	}
 
@@ -370,35 +402,52 @@ func displayCenters(pin *Centers) {
 		log.Println("No Vaccines available for the location")
 	} else {
 		for _, session := range pin.Sessions {
-			log.Println("**************************************************************************")
-			log.Printf("Date: %v", session.Date)
-			log.Printf("Address: %v", session.Address)
-			log.Printf("Name: %v", session.Name)
-			log.Printf("State: %v", session.StateName)
-			log.Printf("District: %v", session.DistrictName)
-			log.Printf("Block: %v", session.BlockName)
-			log.Printf("Block: %v", session.BlockName)
-			log.Printf("PIN: %v", session.Pincode)
-			log.Printf("From: %v", session.From)
-			log.Printf("To: %v", session.To)
-			log.Printf("Fee Type: %v", session.FeeType)
-			log.Printf("Fees: %v", session.Fee)
-			log.Printf("Dosage 1: %v", session.AvailableCapacityDose1)
-			log.Printf("Dosage 2: %v", session.AvailableCapacityDose2)
-			log.Printf("Age Limit %v", session.MinAgeLimit)
-			log.Printf("Vaccine %v", session.Vaccine)
-			log.Printf("Slots %v", session.Slots)
-			log.Println("**************************************************************************")
+			fmt.Println()
+			fmt.Println()
+			fmt.Println()
+			fmt.Println()
+			fmt.Println("**************************************************************************")
+			fmt.Printf("Date: %v", session.Date)
+			fmt.Printf("Address: %v", session.Address)
+			fmt.Printf("Name: %v", session.Name)
+			fmt.Printf("State: %v", session.StateName)
+			fmt.Printf("District: %v", session.DistrictName)
+			fmt.Printf("Block: %v", session.BlockName)
+			fmt.Printf("Block: %v", session.BlockName)
+			fmt.Printf("PIN: %v", session.Pincode)
+			fmt.Printf("From: %v", session.From)
+			fmt.Printf("To: %v", session.To)
+			fmt.Printf("Fee Type: %v", session.FeeType)
+			fmt.Printf("Fees: %v", session.Fee)
+			fmt.Printf("Dosage 1: %v", session.AvailableCapacityDose1)
+			fmt.Printf("Dosage 2: %v", session.AvailableCapacityDose2)
+			fmt.Printf("Age Limit %v", session.MinAgeLimit)
+			fmt.Printf("Vaccine %v", session.Vaccine)
+			fmt.Printf("Slots %v", session.Slots)
+			fmt.Println("**************************************************************************")
+			fmt.Println()
+			fmt.Println()
+			fmt.Println()
+			fmt.Println()
 		}
 	}
 
 }
 
 func checkAuthentication() bool {
+
 	btarr := strings.Split(Bearer, " ")
 	//log.Println(btarr[1])
 	if len(btarr) > 1 && btarr[1] != "" {
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
 		fmt.Println("*****Already Authenticated****")
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
 		return true
 	} else {
 		return false
@@ -406,7 +455,15 @@ func checkAuthentication() bool {
 }
 
 func getAuthenticated() string {
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
 	log.Println("*********Authentication Started*****************")
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
 	var otp GetOTPResp
 	var mob string
 	var otpG string
