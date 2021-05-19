@@ -233,7 +233,7 @@ func main() {
 	fmt.Println("")
 
 	var ex bool
-	for ex != true {
+	for !ex {
 		var ch string
 		fmt.Println("Choose options")
 		fmt.Println("*********************************************")
