@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/common-nighthawk/go-figure"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -218,21 +219,36 @@ func (c *Centers) getCenters(district_id string, date string, vaccine string) {
 
 //*****************************************MAIN******************************************************
 func main() {
-	log.Println("Choose options")
-	log.Println("*********************************************")
-	log.Println("1. No OTP info")
-	log.Println("2. OTP based info")
-	log.Println("*********************************************")
-	var ch string
-	fmt.Print(">>")
-	fmt.Scanf("%s\n", &ch)
-	log.Printf("The choice: %v", ch)
 
-	switch ch {
-	case "1":
-		CaseA()
-	case "2":
-		CaseB()
+	// myFigure := figure.NewColorFigure("Cowin Client", "", "green", false)
+
+	myFigure := figure.NewFigure("Cowin Client", "graffiti", true)
+	myFigure.Print()
+
+	var ex bool
+	for ex != true {
+		var ch string
+		log.Println("Choose options")
+		log.Println("*********************************************")
+		log.Println("1. Non-OTP based (State-Dist-Center list)")
+		log.Println("2. OTP based (PIN based Center list)")
+		log.Println("3. Exit")
+		log.Println("*********************************************")
+		fmt.Print(">>")
+		fmt.Scanf("%s\n", &ch)
+		log.Printf("The choice: %v", ch)
+
+		switch ch {
+		case "1":
+			CaseA()
+			ex = false
+		case "2":
+			CaseB()
+			ex = false
+		case "3":
+			log.Println("********Exiting the Program****************")
+			ex = true
+		}
 	}
 
 }
@@ -273,31 +289,8 @@ func NoOTP(dStateName string, dDistrictName string, dDate string, dVac string) {
 					var centers Centers
 					//get the centers for district , date, vaccine
 					centers.getCenters(strconv.Itoa(district.DistrictID), dDate, dVac)
-					if len(centers.Sessions) == 0 {
-						log.Println("No Vaccines available for the location")
-					} else {
-						for _, session := range centers.Sessions {
-							log.Println("**************************************************************************")
-							log.Printf("Date: %v", session.Date)
-							log.Printf("Address: %v", session.Address)
-							log.Printf("Name: %v", session.Name)
-							log.Printf("State: %v", session.StateName)
-							log.Printf("District: %v", session.DistrictName)
-							log.Printf("Block: %v", session.BlockName)
-							log.Printf("Block: %v", session.BlockName)
-							log.Printf("PIN: %v", session.Pincode)
-							log.Printf("From: %v", session.From)
-							log.Printf("To: %v", session.To)
-							log.Printf("Fee Type: %v", session.FeeType)
-							log.Printf("Fees: %v", session.Fee)
-							log.Printf("Dosage 1: %v", session.AvailableCapacityDose1)
-							log.Printf("Dosage 2: %v", session.AvailableCapacityDose2)
-							log.Printf("Age Limit %v", session.MinAgeLimit)
-							log.Printf("Vaccine %v", session.Vaccine)
-							log.Printf("Slots %v", session.Slots)
-							log.Println("**************************************************************************")
-						}
-					}
+					displayCenters(&centers)
+
 				}
 
 			}
@@ -307,16 +300,20 @@ func NoOTP(dStateName string, dDistrictName string, dDate string, dVac string) {
 }
 
 func CaseA() {
-	fmt.Println("Enter State:")
+	fmt.Println("Enter State (ex: Karnataka)")
+	fmt.Print(">>")
 	var st string
 	fmt.Scanf("%s\n", &st)
-	fmt.Println("Enter District:")
+	fmt.Println("Enter District (ex: BBMP)")
+	fmt.Print(">>")
 	var dt string
 	fmt.Scanf("%s\n", &dt)
-	fmt.Println("Enter Vaccine:")
+	fmt.Println("Enter Vaccine (ex: COVISHIELD, COVAXIN)")
+	fmt.Print(">>")
 	var vc string
 	fmt.Scanf("%s\n", &vc)
-	fmt.Println("Enter Date (dd-mm-yyyy):")
+	fmt.Println("Enter Date (ex: 31-05-2021)")
+	fmt.Print(">>")
 	var dDate string
 	fmt.Scanf("%s\n", &dDate)
 	fmt.Println("******************************************")
@@ -325,36 +322,21 @@ func CaseA() {
 }
 
 func CaseB() {
-	log.Println("*********Authentication Started*****************")
-	var otp GetOTPResp
-	var mob string
-	var otpG string
-	fmt.Println("Enter mobile:")
-	fmt.Scanf("%s\n", &mob)
-	otp.getOTP(mob)
-	var conf ConfirmOTPRespToken
-	fmt.Println("Enter OTP:")
-	fmt.Scanf("%s\n", &otpG)
-	bt := conf.ConfirmMyOTP(otp.TxnId, otpG)
-	btarr := strings.Split(bt, " ")
-	if len(btarr) > 1 {
-		fmt.Println("***********Authentication Passed*******")
-		var pin string
-		var date string
-		fmt.Println("Enter PIN for desired location:")
-		fmt.Scanf("%s\n", &pin)
-		fmt.Println("Enter Date (dd-mm-yyyy):")
-		fmt.Scanf("%s\n", &date)
-		var pinCenters CentersByPIN
-		pinCenters.getCentersByPIN(pin, date, bt)
-		displayCenters(&pinCenters)
+	isLoggedIn := checkAuthentication()
+
+	if isLoggedIn {
+		fmt.Println("***********Authentication Passed for OTP based calls*******")
+		callOTPBased()
 	} else {
-		fmt.Println("***********Authentication Failed*******")
+		fmt.Println("***********Authentication Failed or not done*******")
+		Bearer = getAuthenticated()
+		callOTPBased()
+
 	}
 
 }
 
-func displayCenters(pin *CentersByPIN) {
+func displayPinCenters(pin *CentersByPIN) {
 	if len(pin.Sessions) == 0 {
 		log.Println("No Vaccines available for the location")
 	} else {
@@ -381,4 +363,75 @@ func displayCenters(pin *CentersByPIN) {
 		}
 	}
 
+}
+
+func displayCenters(pin *Centers) {
+	if len(pin.Sessions) == 0 {
+		log.Println("No Vaccines available for the location")
+	} else {
+		for _, session := range pin.Sessions {
+			log.Println("**************************************************************************")
+			log.Printf("Date: %v", session.Date)
+			log.Printf("Address: %v", session.Address)
+			log.Printf("Name: %v", session.Name)
+			log.Printf("State: %v", session.StateName)
+			log.Printf("District: %v", session.DistrictName)
+			log.Printf("Block: %v", session.BlockName)
+			log.Printf("Block: %v", session.BlockName)
+			log.Printf("PIN: %v", session.Pincode)
+			log.Printf("From: %v", session.From)
+			log.Printf("To: %v", session.To)
+			log.Printf("Fee Type: %v", session.FeeType)
+			log.Printf("Fees: %v", session.Fee)
+			log.Printf("Dosage 1: %v", session.AvailableCapacityDose1)
+			log.Printf("Dosage 2: %v", session.AvailableCapacityDose2)
+			log.Printf("Age Limit %v", session.MinAgeLimit)
+			log.Printf("Vaccine %v", session.Vaccine)
+			log.Printf("Slots %v", session.Slots)
+			log.Println("**************************************************************************")
+		}
+	}
+
+}
+
+func checkAuthentication() bool {
+	btarr := strings.Split(Bearer, " ")
+	//log.Println(btarr[1])
+	if len(btarr) > 1 && btarr[1] != "" {
+		fmt.Println("*****Already Authenticated****")
+		return true
+	} else {
+		return false
+	}
+}
+
+func getAuthenticated() string {
+	log.Println("*********Authentication Started*****************")
+	var otp GetOTPResp
+	var mob string
+	var otpG string
+	fmt.Println("Enter mobile (ex: 9xxxxxxxxx)")
+	fmt.Print(">>")
+	fmt.Scanf("%s\n", &mob)
+	otp.getOTP(mob)
+	var conf ConfirmOTPRespToken
+	fmt.Println("Enter OTP (Check you mobile for OTP)")
+	fmt.Print(">>")
+	fmt.Scanf("%s\n", &otpG)
+	bt := conf.ConfirmMyOTP(otp.TxnId, otpG)
+	return bt
+}
+
+func callOTPBased() {
+	var pin string
+	var date string
+	fmt.Println("Enter PIN for desired location (ex: 560017)")
+	fmt.Print(">>")
+	fmt.Scanf("%s\n", &pin)
+	fmt.Println("Enter Date (ex: 31-05-2021)")
+	fmt.Print(">>")
+	fmt.Scanf("%s\n", &date)
+	var pinCenters CentersByPIN
+	pinCenters.getCentersByPIN(pin, date, Bearer)
+	displayPinCenters(&pinCenters)
 }
